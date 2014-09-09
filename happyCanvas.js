@@ -12,13 +12,32 @@ var Ball = function(){
 
 };
 
+Ball.prototype.render = function() {
+  canvasDrawer.drawBall(ball);
+}
+
 var Magnet = function(){
 
 };
 
-var Board = function(elementId){
+var CanvasDrawer = function(elementId) {
   elementId = elementId || '#happycanvas';
   this.canvas = $(elementId);
+  this.context = this.canvas.getContext("2d");
+};
+
+CanvasDrawer.prototype.drawBall = function(ball) {
+  var ctx = this.context;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
+  ctx.fillStyle = 'green';
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#003300';
+  ctx.stroke();
+};
+
+var Board = function(elementId, canvasDrawer){
   if (this.canvas.length < 0){
     console.error('canvas element with id "' + elementId + '" was not found');
   }
@@ -32,6 +51,7 @@ Board.prototype.init = function(){
     this.addBall(ball);
   }
 };
+
 
 Board.prototype.createRandomBall = function(){
   var ball = {
@@ -66,11 +86,15 @@ Board.prototype.tick = function(){
   // getBalls
   // getLaws
   // updatedBalls = applyLaws(ball, laws);
-  // render
+  this.render();
 };
 
 Board.prototype.render = function(){
-
+  var ball;
+  for (var i = 0; i < this._balls.length; i++) {
+    ball = this._balls[i];
+    ball.render()
+  }
 };
 
 if (Meteor.isClient) {
@@ -91,7 +115,8 @@ if (Meteor.isClient) {
   });
 
   Meteor.startup(function () {
-    var board = new Board();
+    var canvasDrawer = CanvasDrawer();
+    var board = new Board(canvasDrawe);
     Meteor.setInterval(board.tick, 20);
   });
 }
