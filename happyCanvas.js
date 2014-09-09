@@ -6,7 +6,6 @@ var Particle = function(coords, velocity, mass, friction){
   this.velocity = velocity;
   this.mass = mass;
   this.friction = friction;
-
 };
 
 var Ball = function(){
@@ -18,14 +17,36 @@ var Magnet = function(){
 };
 
 var Board = function(elementId){
-  elementId = elementId || 'myCanvas';
+  elementId = elementId || '#happycanvas';
   this.canvas = $(elementId);
   if (this.canvas.length < 0){
-    console.log('canvas element with id "' + elementId + '" was not found');
+    console.error('canvas element with id "' + elementId + '" was not found');
   }
-
   this._balls = [];
+  this.init();
 };
+
+Board.prototype.init = function(){
+  for (var i = 0; i < MAX_BALLS; i++) {
+    var ball = this.createRandomBall();
+    this.addBall(ball);
+  }
+};
+
+Board.prototype.createRandomBall = function(){
+  var ball = {
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    mass: Math.random() * 10,
+    friction: 0.8,
+    velocity: {
+      speed: Math.random() * 10,
+      angle: Math.random() * 360
+    }
+  };
+  return ball;
+};
+
 
 Board.prototype.addBall = function(ball){
   if (this._balls.length >= MAX_BALLS){
@@ -40,6 +61,12 @@ Board.prototype.removeBall = function(ball){
 
 Board.prototype.tick = function(){
 
+  console.log("ticking");
+
+  // getBalls
+  // getLaws
+  // updatedBalls = applyLaws(ball, laws);
+  // render
 };
 
 Board.prototype.render = function(){
@@ -61,6 +88,11 @@ if (Meteor.isClient) {
       // increment the counter when button is clicked
       Session.set("counter", Session.get("counter") + 1);
     }
+  });
+
+  Meteor.startup(function () {
+    var board = new Board();
+    Meteor.setInterval(board.tick, 20);
   });
 }
 
