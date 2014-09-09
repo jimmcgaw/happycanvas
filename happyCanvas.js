@@ -1,35 +1,49 @@
 var MAX_BALLS = 100;
 
-var Particle = function(coords, velocity, mass, friction){
-  this.x = coords.x;
-  this.y = coords.y;
-  this.velocity = velocity;
-  this.mass = mass;
-  this.friction = friction;
+var Particle = function(params){
+  this.init(params);
 };
 
-var Ball = function(){
-
+Particle.prototype.init = function(params) {
+  this.x = params.x || 100;
+  this.y = params.y || 100;
+  this.velocity = params.velocity || {angle: 45, speed: 1};
+  this.mass = params.mass || 1;
+  this.friction = params.friction || 0.5;
 };
+
+var Ball = function(params){
+  this.init(params);
+  this.radius = params.radius;
+  this.canvasDrawer = params.canvasDrawer;
+};
+
+Ball.prototype = Particle.prototype;
+Ball.constructor = Ball;
 
 Ball.prototype.render = function() {
-  canvasDrawer.drawBall(ball);
+  this.canvasDrawer.drawCircle(this);
+  console.log('1');
 }
 
 var Magnet = function(){
 
 };
 
+// DRAWING TOOL
+// TAKES A CANVAS
 var CanvasDrawer = function(elementId) {
   elementId = elementId || '#happycanvas';
-  this.canvas = $(elementId);
+  this.canvas = document.querySelector(elementId);
   this.context = this.canvas.getContext("2d");
+  this.width = this.canvas.width;
+  this.height = this.canvas.height;
 };
 
-CanvasDrawer.prototype.drawBall = function(ball) {
+CanvasDrawer.prototype.drawCircle = function(params) {
   var ctx = this.context;
   ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
+  ctx.arc(params.x, params.y, params.radius, 0, 2 * Math.PI, false);
   ctx.fillStyle = 'green';
   ctx.fill();
   ctx.lineWidth = 5;
@@ -37,11 +51,9 @@ CanvasDrawer.prototype.drawBall = function(ball) {
   ctx.stroke();
 };
 
-var Board = function(elementId, canvasDrawer){
-  if (this.canvas.length < 0){
-    console.error('canvas element with id "' + elementId + '" was not found');
-  }
+var Board = function(canvasDrawer){
   this._balls = [];
+  this.canvasDrawer = canvasDrawer;
   this.init();
 };
 
@@ -55,16 +67,18 @@ Board.prototype.init = function(){
 
 Board.prototype.createRandomBall = function(){
   var ball = {
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
+    x: Math.random() * this.canvasDrawer.width,
+    y: Math.random() * this.canvasDrawer.height,
     mass: Math.random() * 10,
     friction: 0.8,
+    radius: 10,
     velocity: {
       speed: Math.random() * 10,
       angle: Math.random() * 360
     }
   };
-  return ball;
+  ball.canvasDrawer = this.canvasDrawer;
+  return new Ball(ball);
 };
 
 
@@ -81,20 +95,17 @@ Board.prototype.removeBall = function(ball){
 
 Board.prototype.tick = function(){
 
-  console.log("ticking");
-
-  // getBalls
-  // getLaws
+  // PHYSICS HERE
   // updatedBalls = applyLaws(ball, laws);
+
+  // RENDER HERE
   this.render();
 };
 
 Board.prototype.render = function(){
-  var ball;
-  for (var i = 0; i < this._balls.length; i++) {
-    ball = this._balls[i];
-    ball.render()
-  }
+  this._balls.forEach( function(ball){
+    ball.render();
+  });
 };
 
 if (Meteor.isClient) {
@@ -115,9 +126,9 @@ if (Meteor.isClient) {
   });
 
   Meteor.startup(function () {
-    var canvasDrawer = CanvasDrawer();
-    var board = new Board(canvasDrawe);
-    Meteor.setInterval(board.tick, 20);
+    var canvasDrawer = new CanvasDrawer();
+    var board = new Board(canvasDrawer);
+    Meteor.setInterval(board.tick.bind(board), 20);
   });
 }
 
