@@ -1,3 +1,4 @@
+dt = 0.02;
 if (Meteor.isClient) {
   // // counter starts at 0
   // Session.setDefault("counter", 0);
@@ -18,7 +19,7 @@ if (Meteor.isClient) {
   Meteor.startup(function () {
     var canvasDrawer = new CanvasDrawer();
     var board = new Board(canvasDrawer);
-    Meteor.setInterval(board.tick.bind(board), 20);
+    Meteor.setInterval(board.tick.bind(board), dt * 1000);
   });
 }
 
