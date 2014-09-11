@@ -1,4 +1,4 @@
-dt = 0.02;
+dt = 0.02; // 20s/1000 = 20 ms
 if (Meteor.isClient) {
   // // counter starts at 0
   // Session.setDefault("counter", 0);
