@@ -17,9 +17,13 @@ if (Meteor.isClient) {
   // });
 
   Meteor.startup(function () {
-    var canvasDrawer = new CanvasDrawer();
-    var board = new Board(canvasDrawer);
-    Meteor.setInterval(board.tick.bind(board), dt * 1000);
+    var game = new Game({
+      elementSelector: '#happycanvas',
+      dimensions: {
+        width: 500,
+        height: 500
+      }
+    });
   });
 }
 
